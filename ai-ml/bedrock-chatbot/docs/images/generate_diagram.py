@@ -9,19 +9,21 @@ import os
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.compute import EC2, ECR
 from diagrams.aws.ml import Bedrock
-from diagrams.aws.network import VPC, PublicSubnet, InternetGateway
+from diagrams.aws.network import InternetGateway
 from diagrams.aws.storage import S3
 from diagrams.aws.analytics import AmazonOpensearchService
 from diagrams.aws.general import Users
-from diagrams.aws.security import IAMRole
+
+FLOW = "#5A6B7C"
+IMAGE = "#D86613"
 
 graph_attr = {
     "fontsize": "22",
     "fontname": "Helvetica",
     "bgcolor": "white",
     "pad": "0.4",
-    "splines": "spline",
-    "nodesep": "0.6",
+    "splines": "ortho",
+    "nodesep": "1.0",
     "ranksep": "0.9",
 }
 
@@ -33,13 +35,14 @@ node_attr = {
 edge_attr = {
     "fontsize": "11",
     "fontname": "Helvetica",
+    "penwidth": "1.4",
 }
 
 with Diagram(
     "Metro Grand Mall Support Agent — AWS Architecture",
     filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), "architecture-diagram"),
     show=False,
-    direction="LR",
+    direction="TB",
     graph_attr=graph_attr,
     node_attr=node_attr,
     edge_attr=edge_attr,
@@ -51,32 +54,27 @@ with Diagram(
         igw = InternetGateway("Internet Gateway")
         with Cluster("Public Subnet"):
             ec2 = EC2("Chat UI\n(Flask + gunicorn)\n:8000")
-
-    ecr = ECR("ECR\nStrands agent image\n(linux/arm64)")
+        igw >> Edge(color=FLOW) >> ec2
 
     with Cluster("Bedrock AgentCore Runtime"):
+        ecr = ECR("ECR\nStrands agent image\n(linux/arm64)")
         agent = Bedrock("Strands Agent\ncontainer")
+        ecr >> Edge(label="container image", style="dashed", color=IMAGE) >> agent
 
     llm = Bedrock("Bedrock FM\n(Claude, cross-region\ninference profile)")
 
     with Cluster("Knowledge base stack"):
         kb = Bedrock("Knowledge Base\n(type: VECTOR)")
-        oss = AmazonOpensearchService("OpenSearch Serverless\ncollection + vector index")
         s3 = S3("S3 bucket\nsample_data/ → policies/")
+        oss = AmazonOpensearchService("OpenSearch Serverless\ncollection + vector index")
 
-        kb >> Edge(label="") >> oss
-        s3 >> Edge(label="embedded vectors", style="dashed") >> oss
+        s3 >> Edge(label="ingestion job", color=FLOW) >> kb
+        kb >> Edge(color=FLOW) >> oss
+        s3 >> Edge(label="embedded vectors", style="dashed", color=IMAGE) >> oss
 
-    iam = IAMRole("IAM roles\n(chat-ui, runtime, kb)")
-
-    user >> Edge(label="HTTP :8000") >> igw >> ec2
-    ec2 >> Edge(label="boto3\ninvoke_agent_runtime()") >> agent
-    ecr >> Edge(label="container image", style="dashed") >> agent
-    agent >> Edge(label="ConverseStream") >> llm
-    agent >> Edge(label="Retrieve") >> kb
-    s3 >> Edge(label="ingestion job") >> kb
-    iam >> Edge(style="dotted", color="gray") >> ec2
-    iam >> Edge(style="dotted", color="gray") >> agent
-    iam >> Edge(style="dotted", color="gray") >> kb
+    user >> Edge(label="HTTP :8000", color=FLOW) >> igw
+    ec2 >> Edge(label="boto3 invoke_agent_runtime()", color=FLOW) >> agent
+    agent >> Edge(label="ConverseStream", color=FLOW, tailport="sw") >> llm
+    agent >> Edge(label="Retrieve", color=FLOW, tailport="se") >> kb
 
 print("done")
