@@ -10,7 +10,7 @@ troubleshooting log live in [`docs/`](docs/):
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — component diagram, request-flow sequence diagram, module table, IAM roles, configuration reference
 - [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) — real issues hit deploying this stack, and their fixes
 
-![AWS architecture diagram](docs/images/architecture-diagram.png)
+<a href="docs/images/architecture-diagram.png"><img src="docs/images/architecture-diagram.png" alt="AWS architecture diagram" width="480"></a>
 
 ## What gets deployed
 

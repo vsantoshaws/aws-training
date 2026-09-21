@@ -2,7 +2,7 @@
 
 ## Component diagram
 
-![AWS architecture diagram](images/architecture-diagram.png)
+<a href="images/architecture-diagram.png"><img src="images/architecture-diagram.png" alt="AWS architecture diagram" width="560"></a>
 
 <details>
 <summary>Mermaid source (text fallback)</summary>
