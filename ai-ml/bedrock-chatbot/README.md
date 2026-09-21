@@ -10,26 +10,7 @@ troubleshooting log live in [`docs/`](docs/):
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — component diagram, request-flow sequence diagram, module table, IAM roles, configuration reference
 - [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) — real issues hit deploying this stack, and their fixes
 
-```mermaid
-flowchart LR
-    User(["Browser"]) -->|":8000"| EC2["EC2 Chat UI<br/>(Flask)"]
-    EC2 -->|invoke_agent_runtime| Agent["AgentCore Runtime<br/>(Strands Agent)"]
-    Agent --> LLM["Bedrock Model<br/>(Claude)"]
-    Agent --> KB["Bedrock<br/>Knowledge Base"]
-    KB --> OSS[("OpenSearch<br/>Serverless")]
-    S3[("S3<br/>policy docs")] --> KB
-```
-
-## Is an AgentCore Gateway needed?
-
-**No, not for this architecture.** AgentCore Gateway is for exposing external
-APIs/Lambdas/services as MCP tools that an agent (or multiple agents/clients) can
-call. Here, the Strands agent talks to the Bedrock Knowledge Base directly using
-the `BedrockKnowledgeBaseStore` memory store (calls the Bedrock `Retrieve` API via
-the standard AWS SDK/credential chain from inside the AgentCore Runtime container).
-No Gateway, no extra hop, no extra resource to manage. If you later want to expose
-this knowledge base (or other tools) to *other* agents/clients over MCP, that's
-when a Gateway becomes useful — it is not included here.
+![AWS architecture diagram](docs/images/architecture-diagram.png)
 
 ## What gets deployed
 

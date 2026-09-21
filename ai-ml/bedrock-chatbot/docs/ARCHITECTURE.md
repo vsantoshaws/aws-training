@@ -2,6 +2,11 @@
 
 ## Component diagram
 
+![AWS architecture diagram](images/architecture-diagram.png)
+
+<details>
+<summary>Mermaid source (text fallback)</summary>
+
 ```mermaid
 flowchart TD
     User(["Browser / User"])
@@ -35,6 +40,8 @@ flowchart TD
     S3 -- "ingestion job\n(null_resource + AWS CLI)" --> KB
     S3 -. "embedded vectors" .-> OSS
 ```
+
+</details>
 
 ## Request flow
 
